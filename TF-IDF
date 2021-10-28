@@ -1,0 +1,20 @@
+----Adding jar file----
+hive> add jar /home/ankitrich26/hivemall-core-0.4.2-rc.2-with-dependencies.jar;
+Added [/home/ankitrich26/hivemall-core-0.4.2-rc.2-with-dependencies.jar] to class path
+
+-----Calculating TF-IDF-----
+create temporary macro max2(x INT, y INT) if(x>y,x,y);
+
+create temporary macro tfidf(tf FLOAT, df_t INT, n_docs INT) tf * (log(10, CAST(n_docs as FLOAT)/max2(1,df_t)) + 1.0);
+
+create table distOwnerIDs as SELECT user_id, SUM(score) AS TotalScore FROM hadoop_stack GROUP BY user_id ORDER BY TotalScore DESC LIMIT 10;
+
+create table mainUSRData as Select HT.user_id,title from hadoop_stack  HT JOIN distOwnerIDs DO on  HT.user_id = DO.user_id
+
+create or replace view mainUSRView as select user_id, eachword from mainUSRData LATERAL VIEW explode(tokenize(title, True)) t as eachword where not is_stopword(eachword);
+
+create or replace view tempView as select user_id, eachword, freq from (select user_id, tf(eachword) as word2freq from mainUSRView group by user_id) t LATERAL VIEW explode(word2freq) t2 as eachword, freq;
+
+create or replace view tfFinalView as select * from (select user_id, eachword, freq,rank()  over (partition by user_id order by freq desc) as rn from tempView as t) as t where t.rn<=10 ;
+
+select * from tfFinalView;
