@@ -1,0 +1,22 @@
+select top 50000 * from posts 
+where posts.ViewCount < 10030841 
+order by posts.ViewCount DESC;
+
+
+select top 50000 * 
+from Posts
+where Posts.ViewCount >62000 
+and Posts.ViewCount < 127042
+order by Posts.ViewCount desc;
+
+select top 50000 * 
+from Posts
+where Posts.ViewCount >20000 
+and Posts.ViewCount < 74480
+order by Posts.ViewCount desc;
+
+select top 50000 * 
+from Posts
+where Posts.ViewCount > 10000
+and Posts.ViewCount < 53185
+order by Posts.ViewCount desc;
